@@ -1651,18 +1651,30 @@
   // Members data
   const members = [
     { name: 'JARR',       role: 'Founder',    divisi: 'Blue Lock Rivals', status: 'active' },
-    { name: 'MIUTIP',     role: 'Co-Founder', divisi: 'Blue Lock Rivals', status: 'active' },
-    { name: 'SEMLAT',     role: 'Captain',    divisi: 'Mobile Legends',   status: 'active' },
-    { name: 'TOTI',       role: 'Officer',    divisi: 'Mobile Legends',   status: 'active' },
-    { name: 'PTORD',      role: 'Officer',    divisi: 'Valorant',         status: 'active' },
-    { name: 'FPASCALINO', role: 'Officer',    divisi: 'Valorant',         status: 'active' },
-    { name: 'YOGAYO',     role: 'Member',     divisi: 'Blue Lock Rivals', status: 'active' },
-    { name: 'YOSZ',       role: 'Member',     divisi: 'Mobile Legends',   status: 'active' },
-    { name: 'QIAX',       role: 'Member',     divisi: 'Valorant',         status: 'active' },
-    { name: 'ARDHANA',    role: 'Member',     divisi: 'Mobile Legends',   status: 'away'   },
-    { name: 'BANYU',      role: 'Member',     divisi: 'Valorant',         status: 'away'   },
+    { name: 'PTORD',      role: 'Co-Founder',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'SEMLAT',     role: 'Captain',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'MIUTIP',     role: 'Admin', divisi: 'Blue Lock Rivals', status: 'active' },
+    { name: 'FPASCALINO', role: 'Admin',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'YOGAYO',     role: 'Admin',     divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'YOSZ',       role: 'Member',     divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'QIAX',       role: 'Member',     divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'ARDHANA',    role: 'Member',     divisi: 'Blue Lock Rivals',   status: 'away'   },
+    { name: 'BANYU',      role: 'Member',     divisi: 'Blue Lock Rivalst',  status: 'away'   },
+    { name: 'TOTI',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'MIKOCIL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'JOESHINE',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'FOODISH',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'NASZ',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'REY',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'MIZOOK',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'RUZZEL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'ZEL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'HONEYBUNS',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'away' },
+    { name: 'YANTO',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'away' },
+    { name: 'ERM',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'QIL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'away' },
+    { name: 'WEZZ',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
   ];
-
   function renderMembers(filter = 'all') {
     const grid = document.getElementById('memberGrid');
     const filtered = filter === 'all' ? members : members.filter(m => m.divisi === filter);
@@ -1852,3 +1864,4 @@
 </script>
 </body>
 </html>
+
