@@ -552,7 +552,6 @@
   .divisi-card[data-color="purple"]::after { background: #8e44ad; }
   .divisi-card[data-color="green"]::after { background: #27ae60; }
   .divisi-card[data-color="orange"]::after { background: #e67e22; }
-  .divisi-card[data-color="dark-red"]::after { background: #8B0000; }
 
   .divisi-num {
     font-family: var(--font-title);
@@ -1166,6 +1165,134 @@
     .vm-values { grid-template-columns: 1fr; }
     .home-stats { flex-direction: column; gap: 20px; }
   }
+
+  /* ===== PARTICLE CANVAS ===== */
+  #particleCanvas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* ===== FLOATING KANJI ===== */
+  .kanji-float {
+    position: fixed;
+    font-family: var(--font-jp);
+    color: rgba(192,57,43,0.06);
+    pointer-events: none;
+    z-index: 0;
+    animation: kanjiDrift linear infinite;
+    user-select: none;
+  }
+  @keyframes kanjiDrift {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateY(-20vh) rotate(20deg); opacity: 0; }
+  }
+
+  /* ===== SECTION SCAN LINE ===== */
+  .scan-line {
+    position: fixed;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(192,57,43,0.15), transparent);
+    pointer-events: none;
+    z-index: 9989;
+    animation: scanMove 8s linear infinite;
+  }
+  @keyframes scanMove {
+    0%   { top: -2px; opacity: 0; }
+    2%   { opacity: 1; }
+    98%  { opacity: 1; }
+    100% { top: 100vh; opacity: 0; }
+  }
+
+  /* ===== GLITCH EFFECT on title hover ===== */
+  .home-title:hover {
+    animation: glitch 0.3s ease;
+  }
+  @keyframes glitch {
+    0%   { text-shadow: none; transform: none; }
+    20%  { text-shadow: 3px 0 var(--red), -3px 0 rgba(201,168,76,0.5); transform: skewX(-2deg); }
+    40%  { text-shadow: -3px 0 var(--red), 3px 0 rgba(201,168,76,0.5); transform: skewX(2deg); }
+    60%  { text-shadow: 2px 0 var(--red); transform: skewX(-1deg); }
+    80%  { text-shadow: -1px 0 var(--red); transform: skewX(1deg); }
+    100% { text-shadow: none; transform: none; }
+  }
+
+  /* ===== SECTION ENTRY LINES ===== */
+  .section-line-anim {
+    position: absolute;
+    left: 0; top: 0;
+    width: 0; height: 2px;
+    background: linear-gradient(90deg, var(--red), transparent);
+    transition: width 1.2s ease;
+  }
+  section.line-visible .section-line-anim { width: 40%; }
+
+  /* ===== COUNTER ANIMATION ===== */
+  .stat-num { transition: color 0.3s; }
+  .stat-num.counting { color: var(--red) !important; }
+
+  /* ===== CARD SHIMMER ===== */
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  .member-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 50%, transparent 100%);
+    background-size: 200% auto;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .member-card:hover::before {
+    opacity: 1;
+    animation: shimmer 1.5s linear infinite;
+  }
+
+  /* ===== BLOOD DRIP on divisi cards ===== */
+  .divisi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20px;
+    width: 2px;
+    background: var(--red);
+    box-shadow: 0 0 6px var(--red-glow);
+    height: 0;
+    transition: height 0.6s cubic-bezier(0.16,1,0.3,1);
+    border-radius: 0 0 2px 2px;
+  }
+  .divisi-card:hover::before { height: 40px; }
+
+  /* ===== TYPEWRITER cursor blink ===== */
+  .typewriter-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    background: var(--red);
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  /* ===== VIGNETTE on home ===== */
+  #home::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
 </style>
 </head>
 <body>
@@ -1173,6 +1300,7 @@
 <!-- Cursor -->
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
+<div class="scan-line"></div>
 
 <!-- Navigation -->
 <nav id="navbar">
@@ -1205,6 +1333,7 @@
 <section id="home">
   <div class="home-bg"></div>
   <div class="home-grid-lines"></div>
+  <canvas id="particleCanvas"></canvas>
 
   <div class="home-content">
     <p class="home-eyebrow">秩序は血によって書かれた</p>
@@ -1236,11 +1365,11 @@
 
   <div class="home-stats">
     <div class="stat-item">
-      <div class="stat-num">24</div>
+      <div class="stat-num">11</div>
       <div class="stat-label">Member Aktif</div>
     </div>
     <div class="stat-item">
-      <div class="stat-num">4</div>
+      <div class="stat-num">3</div>
       <div class="stat-label">Divisi</div>
     </div>
     <div class="stat-item">
@@ -1323,13 +1452,6 @@
       <div class="divisi-desc">Divisi Valorant. Aim sharp, utility tepat, dan mental baja. Kami berlatih callout, strategi per-map, dan mechanics yang tak tertandingi. Satu tembakan, satu keputusan — tidak ada ruang untuk ragu.</div>
       <div class="divisi-badge">Recruiting</div>
     </div>
-    <div class="divisi-card" data-color="dark-red">
-      <div class="divisi-num">04</div>
-      <div class="divisi-icon">☕</div>
-      <div class="divisi-name">GHOUL RE</div>
-      <div class="divisi-jp">グール RE</div>
-      <div class="divisi-desc">Divisi Ghoul//RE. Di antara manusia dan ghoul, kami mencari keseimbangan. Entah kamu bagian dari Quinx Squad atau pengikut One-Eyed King, di sini kekuatan Kagune dan strategi Quinque bersatu. Bertahan hidup adalah keharusan, kopi adalah pelarian.</div>
-      <div class="divisi-badge">Recruiting</div>
   </div>
 </section>
 
@@ -1343,7 +1465,6 @@
       <button class="filter-btn" onclick="filterMembers('Blue Lock Rivals', this)">⚽ Blue Lock</button>
       <button class="filter-btn" onclick="filterMembers('Mobile Legends', this)">🗡️ MLBB</button>
       <button class="filter-btn" onclick="filterMembers('Valorant', this)">🔫 Valorant</button>
-      <button class="filter-btn" onclick="filterMembers('Ghoul RE', this)">☕ Ghoul RE</button>
     </div>
   </div>
 
@@ -1397,7 +1518,6 @@
           <option>Blue Lock Rivals — Striker Egoistik</option>
           <option>Mobile Legends — Land of Dawn</option>
           <option>Valorant — Taktik & Aim</option>
-          <option>Ghoul RE — Human or Monster</option>
         </select>
       </div>
       <div class="form-group">
@@ -1531,29 +1651,16 @@
   // Members data
   const members = [
     { name: 'JARR',       role: 'Founder',    divisi: 'Blue Lock Rivals', status: 'active' },
-    { name: 'PTORD',      role: 'Co-Founder',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'SEMLAT',     role: 'Captain',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'MIUTIP',     role: 'Admin', divisi: 'Blue Lock Rivals', status: 'active' },
-    { name: 'FPASCALINO', role: 'Admin',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'YOGAYO',     role: 'Admin',     divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'YOSZ',       role: 'Member',     divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'QIAX',       role: 'Member',     divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'ARDHANA',    role: 'Member',     divisi: 'Blue Lock Rivals',   status: 'away'   },
-    { name: 'BANYU',      role: 'Member',     divisi: 'Blue Lock Rivalst',  status: 'away'   },
-    { name: 'TOTI',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'MIKOCIL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'JOESHINE',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'FOODISH',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'NASZ',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'REY',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'MIZOOK',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'RUZZEL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'ZEL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'HONEYBUNS',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'away' },
-    { name: 'YANTO',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'away' },
-    { name: 'ERM',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
-    { name: 'QIL',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'away' },
-    { name: 'WEZZ',       role: 'Member',    divisi: 'Blue Lock Rivals',   status: 'active' },
+    { name: 'MIUTIP',     role: 'Co-Founder', divisi: 'Blue Lock Rivals', status: 'active' },
+    { name: 'SEMLAT',     role: 'Captain',    divisi: 'Mobile Legends',   status: 'active' },
+    { name: 'TOTI',       role: 'Officer',    divisi: 'Mobile Legends',   status: 'active' },
+    { name: 'PTORD',      role: 'Officer',    divisi: 'Valorant',         status: 'active' },
+    { name: 'FPASCALINO', role: 'Officer',    divisi: 'Valorant',         status: 'active' },
+    { name: 'YOGAYO',     role: 'Member',     divisi: 'Blue Lock Rivals', status: 'active' },
+    { name: 'YOSZ',       role: 'Member',     divisi: 'Mobile Legends',   status: 'active' },
+    { name: 'QIAX',       role: 'Member',     divisi: 'Valorant',         status: 'active' },
+    { name: 'ARDHANA',    role: 'Member',     divisi: 'Mobile Legends',   status: 'away'   },
+    { name: 'BANYU',      role: 'Member',     divisi: 'Valorant',         status: 'away'   },
   ];
 
   function renderMembers(filter = 'all') {
@@ -1588,10 +1695,160 @@
       window.open('https://discord.gg/RZV9nGab', '_blank');
     }, 1800);
   }
+
+
+  // ===== PARTICLE RAIN CANVAS =====
+  (function() {
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    let W, H, particles = [];
+
+    function resize() {
+      const section = document.getElementById('home');
+      W = canvas.width  = section.offsetWidth;
+      H = canvas.height = section.offsetHeight;
+    }
+    resize();
+    window.addEventListener('resize', () => { resize(); initParticles(); });
+
+    class Particle {
+      constructor() { this.reset(true); }
+      reset(init) {
+        this.x = Math.random() * W;
+        this.y = init ? Math.random() * H : -10;
+        this.len = Math.random() * 18 + 6;
+        this.speed = Math.random() * 3 + 1.5;
+        this.opacity = Math.random() * 0.25 + 0.05;
+        this.width = Math.random() * 0.8 + 0.3;
+        // some are white sparks, most are red-tinted
+        this.color = Math.random() > 0.85 ? '255,255,255' : '220,60,50';
+      }
+      update() {
+        this.y += this.speed;
+        if (this.y > H + this.len) this.reset(false);
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.strokeStyle = `rgba(${this.color},1)`;
+        ctx.lineWidth = this.width;
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x - this.speed * 0.3, this.y + this.len);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    function initParticles() {
+      particles = Array.from({length: 120}, () => new Particle());
+    }
+    initParticles();
+
+    function loop() {
+      ctx.clearRect(0, 0, W, H);
+      particles.forEach(p => { p.update(); p.draw(); });
+      requestAnimationFrame(loop);
+    }
+    loop();
+  })();
+
+  // ===== FLOATING KANJI =====
+  (function() {
+    const kanjiList = ['秩', '序', '力', '血', '忠', '誠', '魂', '剣', '影', '闇'];
+    function spawnKanji() {
+      const el = document.createElement('div');
+      el.className = 'kanji-float';
+      el.textContent = kanjiList[Math.floor(Math.random() * kanjiList.length)];
+      const size = Math.random() * 60 + 20;
+      el.style.cssText = `
+        left: ${Math.random() * 100}vw;
+        font-size: ${size}px;
+        animation-duration: ${Math.random() * 20 + 12}s;
+        animation-delay: ${Math.random() * 5}s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 35000);
+    }
+    for (let i = 0; i < 6; i++) spawnKanji();
+    setInterval(spawnKanji, 3500);
+  })();
+
+  // ===== TYPEWRITER on subtitle =====
+  (function() {
+    const el = document.querySelector('.home-subtitle');
+    if (!el) return;
+    const text = el.textContent.trim();
+    el.innerHTML = '';
+    const cursor = document.createElement('span');
+    cursor.className = 'typewriter-cursor';
+    el.appendChild(cursor);
+    let i = 0;
+    function type() {
+      if (i < text.length) {
+        el.insertBefore(document.createTextNode(text[i++]), cursor);
+        setTimeout(type, 28 + Math.random() * 20);
+      }
+    }
+    setTimeout(type, 1200);
+  })();
+
+  // ===== ANIMATED STAT COUNTERS =====
+  (function() {
+    const stats = document.querySelectorAll('.stat-num');
+    const targets = [11, 3, 1];
+    const suffixes = ['', '', 'yr'];
+    let started = false;
+
+    function countUp() {
+      if (started) return;
+      started = true;
+      stats.forEach((el, idx) => {
+        const target = targets[idx];
+        const suffix = suffixes[idx];
+        let current = 0;
+        el.classList.add('counting');
+        const step = Math.ceil(target / 30);
+        const interval = setInterval(() => {
+          current = Math.min(current + step, target);
+          el.innerHTML = current + (suffix ? `<span>${suffix}</span>` : '');
+          if (current >= target) {
+            clearInterval(interval);
+            el.classList.remove('counting');
+          }
+        }, 60);
+      });
+    }
+
+    const homeObs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) countUp();
+    }, { threshold: 0.5 });
+    const statsEl = document.querySelector('.home-stats');
+    if (statsEl) homeObs.observe(statsEl);
+  })();
+
+  // ===== SECTION LINE ANIM =====
+  document.querySelectorAll('section').forEach(sec => {
+    const line = document.createElement('div');
+    line.className = 'section-line-anim';
+    sec.style.position = 'relative';
+    sec.appendChild(line);
+
+    const o = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) sec.classList.add('line-visible');
+    }, { threshold: 0.1 });
+    o.observe(sec);
+  });
+
+  // ===== GLITCH on nav logo =====
+  const logo = document.querySelector('.nav-logo-main');
+  if (logo) {
+    setInterval(() => {
+      logo.style.textShadow = '2px 0 #c0392b, -2px 0 rgba(201,168,76,0.4)';
+      setTimeout(() => logo.style.textShadow = '', 80);
+    }, 4000);
+  }
+
 </script>
 </body>
-
 </html>
-
-
-
